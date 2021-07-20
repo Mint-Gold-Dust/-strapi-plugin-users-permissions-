@@ -112,7 +112,7 @@ module.exports = {
       // Check params.password and verify it is signed by the ethereumAddress from the user
 
       // const msg = `I am signing my one-time nonce: ${user.nonce}`;
-      const msg = 'Example `personal_sign` message';
+      const msg = `I am signing my one-time nonce: ${user.nonce}`
 
       // We now are in possession of msg, publicAddress and signature. We
       // will use a helper from eth-sig-util to extract the address from the signature
@@ -122,7 +122,6 @@ module.exports = {
         data: msgBufferHex,
         sig: params.password,
       });
-
 
       // NOTE: we don't need this check since the user won't have a password
       // The user never authenticated with the `local` provider.
