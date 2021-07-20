@@ -1,6 +1,5 @@
 'use strict';
-import { recoverPersonalSignature } from 'eth-sig-util';
-import { bufferToHex } from 'ethereumjs-util';
+
 /**
  * Auth.js controller
  *
@@ -12,6 +11,8 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const grant = require('grant-koa');
 const { sanitizeEntity } = require('strapi-utils');
+const { recoverPersonalSignature } = require('eth-sig-util');
+const { bufferToHex } = require('ethereumjs-util');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const formatError = error => [
@@ -40,7 +41,7 @@ module.exports = {
           null,
           formatError({
             id: 'Auth.form.error.email.provide',
-            message: 'Please provide your username or your e-mail.',
+            message: 'Please provide your ethereum address, username or your e-mail.',
           })
         );
       }
@@ -62,15 +63,16 @@ module.exports = {
       const isEmail = emailRegExp.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
+      // TODO: decide if we should keep email and username as identifier for future usage
       if (isEmail) {
         query.email = params.identifier.toLowerCase();
       } else {
         // Replace username identifier for ethereum address identifier
         //query.username = params.identifier;
-        query.ethereumAddress = params.identifier;
+        query.ethereumAddress = params.identifier.toLowerCase();
       }
 
-      // Check if the user exists.
+      // Check if the user exists.      
       const user = await strapi.query('user', 'users-permissions').findOne(query);
 
       if (!user) {
@@ -106,52 +108,50 @@ module.exports = {
         );
       }
 
-      // Return nonce and so user can sign it in the frontend
-      // Check params.messageSigned and verify it is signed by the ethereumAddress instead of password
+      // We expect to recieve a message signed with a nonce in the params.password
+      // Check params.password and verify it is signed by the ethereumAddress from the user
 
-      const msg = `I am signing my one-time nonce: ${user.nonce}`;
+      // const msg = `I am signing my one-time nonce: ${user.nonce}`;
+      const msg = 'Example `personal_sign` message';
 
       // We now are in possession of msg, publicAddress and signature. We
       // will use a helper from eth-sig-util to extract the address from the signature
-      const msgBufferHex = bufferToHex(Buffer.from(msg, 'utf8'));
+      // const msgBufferHex = `0x{bufferToHex(Buffer.from(msg, 'utf8'))}`;
+      const msgBufferHex = `0x${Buffer.from(msg, 'utf8').toString('hex')}`;
       const address = recoverPersonalSignature({
         data: msgBufferHex,
-        sig: signature,
+        sig: params.password,
       });
+
+
+      // NOTE: we don't need this check since the user won't have a password
+      // The user never authenticated with the `local` provider.
+      // if (!user.password) {
+      //   return ctx.badRequest(
+      //     null,
+      //     formatError({
+      //       id: 'Auth.form.error.password.local',
+      //       message:
+      //         'This user never set a local password, please login with the provider used during account creation.',
+      //     })
+      //   );
+      // }
+
+      // const validPassword = await strapi.plugins[
+      //   'users-permissions'
+      // ].services.user.validatePassword(params.password, user.password);
+
+      // if (!validPassword) {
 
       // The signature verification is successful if the address found with
       // sigUtil.recoverPersonalSignature matches the initial publicAddress
-      if (address.toLowerCase() === user.ethereumAddress.toLowerCase()) {
-        return user;
-      } else {
-        res.status(401).send({
-          error: 'Signature verification failed',
-        });
-        // return null;
-      }
-
-      // The user never authenticated with the `local` provider.
-      if (!user.password) {
+      // it returns user object if successful
+      if (address.toLowerCase() !== user.ethereumAddress.toLowerCase()) {
         return ctx.badRequest(
           null,
           formatError({
-            id: 'Auth.form.error.password.local',
-            message:
-              'This user never set a local password, please login with the provider used during account creation.',
-          })
-        );
-      }
-
-      const validPassword = await strapi.plugins[
-        'users-permissions'
-      ].services.user.validatePassword(params.password, user.password);
-
-      if (!validPassword) {
-        return ctx.badRequest(
-          null,
-          formatError({
-            id: 'Auth.form.error.invalid',
-            message: 'Identifier or password invalid.',
+            id: 'Auth.form.error.ethaddress.matching',
+            message: 'Signature verification failed.',
           })
         );
       } else {
@@ -163,6 +163,12 @@ module.exports = {
             model: strapi.query('user', 'users-permissions').model,
           }),
         });
+        // Update nonce.
+        const result = await strapi
+        .query('user', 'users-permissions')
+        .update({ id: user.id }, { nonce: Math.floor(Math.random() * 1000000) });
+
+        console.log(result);
       }
     } else {
       if (!_.get(await store.get({ key: 'grant' }), [provider, 'enabled'])) {
@@ -421,39 +427,50 @@ module.exports = {
       provider: 'local',
     };
 
-    // Password is required.
-    if (!params.password) {
+    // Ethereum address is required.
+    if (!params.ethereumAddress) {
       return ctx.badRequest(
         null,
         formatError({
-          id: 'Auth.form.error.password.provide',
-          message: 'Please provide your password.',
+          id: 'Auth.form.error.ethereumAddress.provide',
+          message: 'Please provide your Ethereum Address.',
         })
       );
     }
 
-    // Email is required.
-    if (!params.email) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.provide',
-          message: 'Please provide your email.',
-        })
-      );
-    }
+    // Password is not required.
+    // if (!params.password) {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.password.provide',
+    //       message: 'Please provide your password.',
+    //     })
+    //   );
+    // }
+
+    // Email is not required.
+    // if (!params.email) {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.email.provide',
+    //       message: 'Please provide your email.',
+    //     })
+    //   );
+    // }
 
     // Throw an error if the password selected by the user
     // contains more than three times the symbol '$'.
-    if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.password.format',
-          message: 'Your password cannot contain more than three times the symbol `$`.',
-        })
-      );
-    }
+    // if (strapi.plugins['users-permissions'].services.user.isHashed(params.password)) {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.password.format',
+    //       message: 'Your password cannot contain more than three times the symbol `$`.',
+    //     })
+    //   );
+    // }
 
     const role = await strapi
       .query('role', 'users-permissions')
@@ -487,6 +504,21 @@ module.exports = {
     params.role = role.id;
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
+    // Check if Ethereum Address is not taken by other account
+    const ethereumAddress = await strapi.query('user', 'users-permissions').findOne({
+      ethereumAddress: params.ethereumAddress.toLowerCase(),
+    });
+
+    if (ethereumAddress && user.provider === params.provider) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.ethereumAddress.taken',
+          message: 'Ethereum address is already taken.',
+        })
+      );
+    }
+
     const user = await strapi.query('user', 'users-permissions').findOne({
       email: params.email,
     });
@@ -510,6 +542,8 @@ module.exports = {
         })
       );
     }
+
+    params.nonce = Math.floor(Math.random() * 1000000);
 
     try {
       if (!settings.email_confirmation) {
@@ -539,12 +573,13 @@ module.exports = {
         user: sanitizedUser,
       });
     } catch (err) {
-      const adminError = _.includes(err.message, 'username')
+      console.log(err);
+      const adminError = _.includes(err.message, 'email')
         ? {
-            id: 'Auth.form.error.username.taken',
-            message: 'Username already taken',
+            id: 'Auth.form.error.email.taken',
+            message: 'Email already taken',
           }
-        : { id: 'Auth.form.error.email.taken', message: 'Email already taken' };
+        : { id: 'Auth.form.error.ethereumAddress.taken', message: 'Ethereum Address already taken' };
 
       ctx.badRequest(null, formatError(adminError));
     }
