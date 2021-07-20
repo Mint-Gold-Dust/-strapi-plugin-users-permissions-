@@ -87,6 +87,8 @@ module.exports = {
     if (data) {
       data = sanitizeUser(data);
     }
+    const nonce = Object.fromEntries(Object.entries(data).filter(([key, value]) => key.includes('nonce')))
+
 
     // try {
     //   await strapi.plugins['users-permissions'].services.user.updateNonce(user);
@@ -95,7 +97,7 @@ module.exports = {
     // }
 
     // Send 200 `ok`
-    ctx.body = data;
+    ctx.body = nonce;
   },
 
   /**
