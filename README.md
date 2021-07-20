@@ -1,1 +1,1 @@
-# Strapi plugin# strastrapi-plugin-users-permissionspi-plugin-users-permissions
+# Strapi plugin strapi-plugin-users-permissions
