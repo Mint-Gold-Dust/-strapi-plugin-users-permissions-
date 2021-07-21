@@ -1,4 +1,5 @@
 {
+  "kind": "collectionType",
   "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
@@ -16,6 +17,10 @@
       "configurable": false,
       "required": false
     },
+    "slug": {
+      "type": "uid",
+      "targetField": "username"
+    },
     "ethereumAddress": {
       "type": "string",
       "minLength": 42,
@@ -25,14 +30,37 @@
       "required": true
     },
     "nonce": {
-      "type": "int",
-      "max": 1000000
+      "type": "biginteger"
     },
     "email": {
       "type": "email",
       "minLength": 6,
       "configurable": false,
       "required": false
+    },
+    "profile_picture": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
+      "plugin": "upload",
+      "required": false,
+      "pluginOptions": {}
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "collector",
+        "artist"
+      ],
+      "required": true,
+      "default": "collector"
     },
     "provider": {
       "type": "string",
