@@ -578,6 +578,8 @@ module.exports = {
       });
     } catch (err) {
       console.log(err);
+      // TODO: this adminError always return 'Duplicate entry; but not the field duplicated 
+      // TODO: so message is always the second option
       const adminError = _.includes(err.message, 'username')
         ? {
             id: 'Auth.form.error.username.taken',
