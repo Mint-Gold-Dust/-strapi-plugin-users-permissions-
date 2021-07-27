@@ -578,10 +578,10 @@ module.exports = {
       });
     } catch (err) {
       console.log(err);
-      const adminError = _.includes(err.message, 'email')
+      const adminError = _.includes(err.message, 'username')
         ? {
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken',
+            id: 'Auth.form.error.username.taken',
+            message: 'Username already taken',
           }
         : { id: 'Auth.form.error.ethereumAddress.taken', message: 'Ethereum Address already taken' };
 
