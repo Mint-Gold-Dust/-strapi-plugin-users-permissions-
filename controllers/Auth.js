@@ -490,15 +490,17 @@ module.exports = {
 
     if (isEmail) {
       params.email = params.email.toLowerCase();
-    } else {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
-        })
-      );
     }
+    // email is not mandatory so we don't send any error
+    // } else {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.email.format',
+    //       message: 'Please provide valid email address.',
+    //     })
+    //   );
+    // }
 
     params.role = role.id;
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
