@@ -111,9 +111,10 @@ module.exports = {
       id,
     });
 
-    if (_.has(ctx.request.body, 'email') && !email) {
-      return ctx.badRequest('email.notNull');
-    }
+    // email is not mandatory
+    // if (_.has(ctx.request.body, 'email') && !email) {
+    //   return ctx.badRequest('email.notNull');
+    // }
 
     if (_.has(ctx.request.body, 'username') && !username) {
       return ctx.badRequest('username.notNull');
