@@ -310,15 +310,17 @@ module.exports = {
 
     if (isEmail) {
       email = email.toLowerCase();
-    } else {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
-        })
-      );
-    }
+    } 
+    
+    // else {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.email.format',
+    //       message: 'Please provide valid email address.',
+    //     })
+    //   );
+    // }
 
     const pluginStore = await strapi.store({
       environment: '',
@@ -490,15 +492,17 @@ module.exports = {
 
     if (isEmail) {
       params.email = params.email.toLowerCase();
-    } else {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
-        })
-      );
     }
+    // email is not mandatory so we don't send any error
+    // } else {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.email.format',
+    //       message: 'Please provide valid email address.',
+    //     })
+    //   );
+    // }
 
     params.role = role.id;
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
@@ -518,30 +522,31 @@ module.exports = {
       );
     }
 
-    const user = await strapi.query('user', 'users-permissions').findOne({
-      email: params.email,
-    });
+    if (params.email) {
+      const user = await strapi.query('user', 'users-permissions').findOne({
+        email: params.email,
+      });
 
-    if (user && user.provider === params.provider) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.taken',
-          message: 'Email is already taken.',
-        })
-      );
+      if (user && user.provider === params.provider) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email is already taken.',
+          })
+        );
+      }
+
+      if (user && user.provider !== params.provider && settings.unique_email) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email is already taken.',
+          })
+        );
+      }
     }
-
-    if (user && user.provider !== params.provider && settings.unique_email) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.taken',
-          message: 'Email is already taken.',
-        })
-      );
-    }
-
     params.nonce = Math.floor(Math.random() * 1000000);
 
     try {
@@ -573,10 +578,12 @@ module.exports = {
       });
     } catch (err) {
       console.log(err);
-      const adminError = _.includes(err.message, 'email')
+      // TODO: this adminError always return 'Duplicate entry; but not the field duplicated 
+      // TODO: so message is always the second option
+      const adminError = _.includes(err.message, 'username')
         ? {
-            id: 'Auth.form.error.email.taken',
-            message: 'Email already taken',
+            id: 'Auth.form.error.username.taken',
+            message: 'Username already taken',
           }
         : { id: 'Auth.form.error.ethereumAddress.taken', message: 'Ethereum Address already taken' };
 

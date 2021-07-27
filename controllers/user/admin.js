@@ -163,9 +163,10 @@ module.exports = {
       id
     );
 
-    if (_.has(body, 'email') && !email) {
-      return ctx.badRequest('email.notNull');
-    }
+    // email is not mandatory
+    // if (_.has(body, 'email') && !email) {
+    //   return ctx.badRequest('email.notNull');
+    // }
 
     if (_.has(body, 'username') && !username) {
       return ctx.badRequest('username.notNull');
@@ -192,7 +193,7 @@ module.exports = {
       }
     }
 
-    if (_.has(body, 'email') && advancedConfigs.unique_email) {
+    if (_.has(body, 'email') && email && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
         .query('user', 'users-permissions')
         .findOne({ email: email.toLowerCase() });
