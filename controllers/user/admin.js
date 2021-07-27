@@ -193,7 +193,7 @@ module.exports = {
       }
     }
 
-    if (_.has(body, 'email') && advancedConfigs.unique_email) {
+    if (_.has(body, 'email') && email && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
         .query('user', 'users-permissions')
         .findOne({ email: email.toLowerCase() });
