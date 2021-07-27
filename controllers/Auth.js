@@ -310,15 +310,17 @@ module.exports = {
 
     if (isEmail) {
       email = email.toLowerCase();
-    } else {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
-        })
-      );
-    }
+    } 
+    
+    // else {
+    //   return ctx.badRequest(
+    //     null,
+    //     formatError({
+    //       id: 'Auth.form.error.email.format',
+    //       message: 'Please provide valid email address.',
+    //     })
+    //   );
+    // }
 
     const pluginStore = await strapi.store({
       environment: '',
@@ -520,30 +522,31 @@ module.exports = {
       );
     }
 
-    const user = await strapi.query('user', 'users-permissions').findOne({
-      email: params.email,
-    });
+    if (params.email) {
+      const user = await strapi.query('user', 'users-permissions').findOne({
+        email: params.email,
+      });
 
-    if (user && user.provider === params.provider) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.taken',
-          message: 'Email is already taken.',
-        })
-      );
+      if (user && user.provider === params.provider) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email is already taken.',
+          })
+        );
+      }
+
+      if (user && user.provider !== params.provider && settings.unique_email) {
+        return ctx.badRequest(
+          null,
+          formatError({
+            id: 'Auth.form.error.email.taken',
+            message: 'Email is already taken.',
+          })
+        );
+      }
     }
-
-    if (user && user.provider !== params.provider && settings.unique_email) {
-      return ctx.badRequest(
-        null,
-        formatError({
-          id: 'Auth.form.error.email.taken',
-          message: 'Email is already taken.',
-        })
-      );
-    }
-
     params.nonce = Math.floor(Math.random() * 1000000);
 
     try {
