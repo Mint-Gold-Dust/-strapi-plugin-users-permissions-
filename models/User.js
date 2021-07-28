@@ -10,13 +10,13 @@ module.exports = {
   lifecycles: {
     async beforeCreate(data) {
       if (data.username) {
-        data.slug = slugify(data.title, {lower: true});
+        data.slug = slugify(data.username, {lower: true});
       }
       data.nonce = nonce;
     },
     async beforeUpdate(params, data) {
       if (data.username) {
-        data.slug = slugify(data.title, {lower: true});
+        data.slug = slugify(data.username, {lower: true});
       }
     },
   },
