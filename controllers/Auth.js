@@ -522,6 +522,20 @@ module.exports = {
       );
     }
 
+    const usernameCheck = await strapi.query('user', 'users-permissions').findOne({
+      username: params.username,
+    });
+
+    if (usernameCheck && user.provider === params.provider) {
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.username.taken',
+          message: 'Username is already taken.',
+        })
+      );
+    }
+
     if (params.email) {
       const user = await strapi.query('user', 'users-permissions').findOne({
         email: params.email,
@@ -585,7 +599,7 @@ module.exports = {
             id: 'Auth.form.error.username.taken',
             message: 'Username already taken',
           }
-        : { id: 'Auth.form.error.ethereumAddress.taken', message: 'Ethereum Address already taken' };
+        : { id: 'Auth.form.error.ethereumAddress.taken', message: 'Ethereum Address or username already taken' };
 
       ctx.badRequest(null, formatError(adminError));
     }
