@@ -80,7 +80,7 @@ module.exports = {
           null,
           formatError({
             id: 'Auth.form.error.invalid',
-            message: 'Identifier or password invalid.',
+            message: 'There is no account with this Ethereum address.',
           })
         );
       }
@@ -437,6 +437,8 @@ module.exports = {
           message: 'Please provide your Ethereum Address.',
         })
       );
+    } else {
+      params.ethereumAddress = params.ethereumAddress.toLowerCase();
     }
 
     // Password is not required.
@@ -508,11 +510,11 @@ module.exports = {
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
     // Check if Ethereum Address is not taken by other account
-    const ethereumAddress = await strapi.query('user', 'users-permissions').findOne({
-      ethereumAddress: params.ethereumAddress.toLowerCase(),
+    const ethereumAddressCheck = await strapi.query('user', 'users-permissions').findOne({
+      ethereumAddress: params.ethereumAddress,
     });
 
-    if (ethereumAddress && user.provider === params.provider) {
+    if (ethereumAddressCheck) {
       return ctx.badRequest(
         null,
         formatError({
@@ -526,7 +528,7 @@ module.exports = {
       username: params.username,
     });
 
-    if (usernameCheck && user.provider === params.provider) {
+    if (usernameCheck) {
       return ctx.badRequest(
         null,
         formatError({
