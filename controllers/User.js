@@ -147,4 +147,17 @@ module.exports = {
 
     ctx.body = sanitizeUser(user);
   },
+
+  /**
+   * Update authenticated User
+   */
+  async updateMe(ctx) {
+    const user = ctx.state.user;
+
+    if (!user) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
+    }
+
+   return adminUserController.update({admin: user, ...ctx})
+  }
 };
