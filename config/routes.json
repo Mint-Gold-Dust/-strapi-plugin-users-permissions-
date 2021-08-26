@@ -339,6 +339,22 @@
         }
       }
     },
+
+    {
+      "method": "PUT",
+      "path": "/users/me",
+      "handler": "User.updateMe",
+      "config": {
+        "policies": [],
+        "prefix": "",
+        "description": "Updates the logged in user information",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User",
+          "actionType": "findOne"
+        }
+      }
+    },
     {
       "method": "GET",
       "path": "/users/:id",
