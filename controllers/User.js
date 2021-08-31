@@ -139,7 +139,7 @@ module.exports = {
    * @return {Object|Array}
    */
   async me(ctx) {
-    const user = ctx.state.user;
+    let user = ctx.state.user;
 
     if (!user) {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
