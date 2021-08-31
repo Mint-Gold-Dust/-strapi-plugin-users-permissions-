@@ -139,11 +139,13 @@ module.exports = {
    * @return {Object|Array}
    */
   async me(ctx) {
-    const user = ctx.state.user;
+    let user = ctx.state.user;
 
     if (!user) {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
+
+    user = strapi.plugins['users-permissions'].services.user.fetch({ id: user.id }, ['artworks', 'collected', 'memoirs', 'interviews', 'orders', 'links'])
 
     ctx.body = sanitizeUser(user);
   },
