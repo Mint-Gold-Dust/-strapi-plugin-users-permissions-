@@ -160,11 +160,12 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
 
-    const { email, profile_picture, links = [] } = ctx.request.body;
+    const { email, profile_picture, bio, links = [] } = ctx.request.body;
 
     const updatedUser = await strapi.plugins['users-permissions'].services.user.edit({ id: user.id }, {
       email,
       profile_picture,
+      bio,
       links
     });
 
