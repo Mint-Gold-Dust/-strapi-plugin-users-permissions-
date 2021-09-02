@@ -145,7 +145,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
     }
 
-    user = strapi.plugins['users-permissions'].services.user.fetch({ id: user.id }, ['artworks', 'collected', 'memoirs', 'interviews', 'orders', 'links'])
+    user = await strapi.plugins['users-permissions'].services.user.fetch({ id: user.id }, ['artworks', 'collected', 'memoirs', 'interviews', 'orders', 'links'])
 
     ctx.body = sanitizeUser(user);
   },
@@ -153,7 +153,7 @@ module.exports = {
   /**
    * Update authenticated User
    */
-  async updateMe (ctx) {
+  async updateMe(ctx) {
     const user = ctx.state.user
 
     if (!user) {
