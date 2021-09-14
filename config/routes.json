@@ -1,6 +1,5 @@
 {
-  "routes": [
-    {
+  "routes": [{
       "method": "GET",
       "path": "/",
       "handler": "UsersPermissions.index",
@@ -304,6 +303,15 @@
       "method": "GET",
       "path": "/users/count",
       "handler": "User.count",
+      "config": {
+        "prefix": "",
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/artists",
+      "handler": "User.getArtists",
       "config": {
         "prefix": "",
         "policies": []
