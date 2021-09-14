@@ -170,5 +170,31 @@ module.exports = {
     });
 
     ctx.body = sanitizeUser(updatedUser);
+  },
+
+  /**
+   * get Users with type=artist + params for pagination
+   */
+  async getArtists(ctx) {
+    let params = ctx.params
+    let users;
+    let usersCount;
+
+    params["type"] = "artist"
+
+    usersCount = await strapi.plugins['users-permissions'].services.user.count(params);
+    users = await strapi.plugins['users-permissions'].services.user.find(
+      params, ['profile_picture', 'slug', 'username']
+    );
+
+    if (!users) {
+      return ctx.badRequest('No artists found');
+    }
+
+    // sanitize and append artists and append count
+    entities["artists"] = users.map(entity => sanitizeEntity(entity, { model: strapi.models.user }));
+    entities["count"] = usersCount
+
+    return entities
   }
 }
