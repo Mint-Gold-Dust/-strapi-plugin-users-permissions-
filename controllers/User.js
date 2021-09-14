@@ -191,7 +191,7 @@ module.exports = {
     }
 
     // sanitize and append artists and append count
-    entities["users"] = users.map(entity => sanitizeEntity(entity, { model: strapi.models.user }));
+    entities["artists"] = users.map(entity => sanitizeEntity(entity, { model: strapi.models.user }));
     entities["count"] = usersCount
 
     return entities
