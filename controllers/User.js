@@ -177,6 +177,7 @@ module.exports = {
   async getArtists(ctx) {
     let params = ctx.params
     let users;
+    let usersCount;
 
     params["type"] = "artist"
 
