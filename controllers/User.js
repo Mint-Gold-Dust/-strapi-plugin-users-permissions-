@@ -191,7 +191,7 @@ module.exports = {
     }
 
     // sanitize and append artists and append count
-    entities["artists"] = users.map(entity => sanitizeEntity(entity, { model: strapi.models.user }));
+    entities["artists"] = users.map(entity => sanitizeEntity(entity, { model: strapi.plugins['users-permissions'].models.user }));
     entities["count"] = usersCount
 
     return entities
