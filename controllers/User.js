@@ -183,7 +183,7 @@ module.exports = {
     query["type"] = "artist"
 
     usersCount = await strapi.plugins['users-permissions'].services.user.count(query);
-    users = await strapi.plugins['users-permissions'].services.user.find(
+    users = await strapi.plugins['users-permissions'].services.user.fetchAll(
       query, ['profile_picture', 'slug', 'username']
     );
 
