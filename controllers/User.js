@@ -179,6 +179,7 @@ module.exports = {
     let query = ctx.query
     let users;
     let usersCount;
+    let entities;
 
     query["type"] = "artist"
 
