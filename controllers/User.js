@@ -176,15 +176,15 @@ module.exports = {
    * get Users with type=artist + params for pagination
    */
   async getArtists(ctx) {
-    let params = ctx.params
+    let query = ctx.query
     let users;
     let usersCount;
 
-    params["type"] = "artist"
+    query["type"] = "artist"
 
-    usersCount = await strapi.plugins['users-permissions'].services.user.count(params);
+    usersCount = await strapi.plugins['users-permissions'].services.user.count(query);
     users = await strapi.plugins['users-permissions'].services.user.find(
-      params, ['profile_picture', 'slug', 'username']
+      query, ['profile_picture', 'slug', 'username']
     );
 
     if (!users) {
