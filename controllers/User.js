@@ -182,13 +182,6 @@ module.exports = {
 
     query['type'] = 'artist'
 
-    // Strip pagination from total count request
-    let countQuery = query
-    delete countQuery['_sort']
-    delete countQuery['_limit']
-    delete countQuery['_start']
-
-    usersCount = await strapi.plugins['users-permissions'].services.user.count(countQuery);
     users = await strapi.plugins['users-permissions'].services.user.fetchAll(
       query, ['profile_picture', 'slug', 'username']
     );
@@ -196,6 +189,14 @@ module.exports = {
     if (!users) {
       return ctx.badRequest('No artists found');
     }
+
+    // Get total result count with filtering
+    // Strip pagination from total count request
+    delete query['_sort']
+    delete query['_limit']
+    delete query['_start']
+
+    usersCount = await strapi.plugins['users-permissions'].services.user.count(query);
 
     // sanitize and append artists and append count
     entities['artists'] = users.map(entity => sanitizeEntity(entity, { model: strapi.plugins['users-permissions'].models.user }));
