@@ -310,15 +310,6 @@
     },
     {
       "method": "GET",
-      "path": "/artists",
-      "handler": "User.getArtists",
-      "config": {
-        "prefix": "",
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/users",
       "handler": "User.find",
       "config": {
