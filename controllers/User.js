@@ -183,7 +183,13 @@ module.exports = {
 
     query["type"] = "artist"
 
-    usersCount = await strapi.plugins['users-permissions'].services.user.count(query);
+    // Strip pagination from total count request
+    let countQuery = query
+    countQuery["_sort"] = null
+    countQuery["_limit"] = null
+    countQuery["_start"] = null
+
+    usersCount = await strapi.plugins['users-permissions'].services.user.count(countQuery);
     users = await strapi.plugins['users-permissions'].services.user.fetchAll(
       query, ['profile_picture', 'slug', 'username']
     );
