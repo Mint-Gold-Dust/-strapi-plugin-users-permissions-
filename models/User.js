@@ -20,8 +20,10 @@ module.exports = {
       }
     },
     async afterCreate(result) {
-      // Trigger calculation of Collector-stats for new user by ethereum address
-      strapi.services['collector-stats'].enqueue(result.ethereumAddress);
+      if (result.type === "collector") {
+        // Trigger calculation of Collector-stats for new user by ethereum address
+        strapi.services['collector-stats'].enqueue(result.ethereumAddress);
+      }
     }
   },
 };
